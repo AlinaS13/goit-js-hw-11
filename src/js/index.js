@@ -72,7 +72,7 @@ async function fetchPicture(searchQuery) {
 function createMarkap(searchQuery) {
   fetchPicture(searchQuery)
     .then(data => {
-      if (data.hits.length === 0) {
+      if (data.hits.length === 0 && totalHits == 0) {
         return Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
@@ -110,6 +110,11 @@ function createMarkap(searchQuery) {
       );
       if (gallery.textContent.trim() == '') {
         Notify.success(`Hooray! We found ${data.totalHits} images.`);
+      }
+      if (currentHits === totalHits) {
+        Notify.info(
+          "We're sorry, but you've reached the end of search results."
+        );
       }
       gallery.insertAdjacentHTML('beforeend', markup.join(''));
       simpleLightbox();
