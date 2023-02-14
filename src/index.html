@@ -8,7 +8,27 @@
     <title>Homework 11</title>
   </head>
   <body>
-    <h1>Hello</h1>
-    <script defer src="../src/js/index.js" type="module"></script>
+    <form class="search-form" id="search-form">
+      <div class="input-group">
+        <div class="input-group2">
+          <input
+            type="text"
+            name="searchQuery"
+            autocomplete="off"
+            placeholder="Search images..."
+            class="search-field"
+          />
+          <button
+            type="submit"
+            class="rstore-domain-search-button search-submit btn btn-primary"
+          >
+            Search
+          </button>
+        </div>
+      </div>
+    </form>
+    <div class="gallery"></div>
+    <button type="button" class="load-more is-hidden">Load more</button>
+    <script src="./js/index.js" type="module"></script>
   </body>
 </html>

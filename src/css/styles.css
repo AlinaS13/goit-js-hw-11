@@ -1,0 +1,131 @@
+body {
+  background: #3644af;
+}
+.search-form {
+  display: block;
+  margin: 30px 0;
+}
+
+.search-field {
+  padding: 10px 15px;
+  min-width: 55%;
+  font-size: 1rem;
+  line-height: 1.5em;
+  color: #373d41;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #c5c5c7;
+  border-radius: 6px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  flex-grow: 1;
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.search-submit {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: normal;
+  -webkit-transition: none;
+  transition: none;
+  cursor: pointer;
+  outline: 0;
+  padding: 14px 24px 13px;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  border-radius: 6px;
+  border-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.search-form .input-group {
+  text-align: center;
+}
+
+.is-hidden {
+  opacity: 0;
+}
+
+.photo-card {
+  position: relative;
+}
+.info {
+  display: flex;
+  justify-content: space-around;
+  column-gap: 20px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  position: absolute;
+  background-color: rgba(23, 23, 69, 0.369);
+  top: 200px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
+.info-item {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  width: 100px;
+  height: 165px;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.gallery {
+  display: grid;
+  max-width: 1140px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-auto-rows: 240px;
+  grid-gap: 20px;
+  justify-content: center;
+  padding: 0;
+  list-style: none;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 30px;
+}
+
+.gallery-image:hover {
+  transform: scale(1.03);
+}
+
+.gallery-image {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform var(--animation-duration) var(--timing-function);
+  position: relative;
+}
+
+.load-more {
+  display: block;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: normal;
+
+  cursor: pointer;
+  outline: 0;
+  padding: 14px 24px 13px;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  border-radius: 6px;
+  border-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  display: block;
+  margin: 0 auto;
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
