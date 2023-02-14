@@ -19,6 +19,7 @@ let page = 1;
 let searchQuery;
 let totalHits = 0;
 let currentHits = 0;
+let pictureEnds = false;
 
 // function loadMorePiture(e) {
 //   e.preventDefault();
@@ -39,6 +40,7 @@ function renderPicture(e) {
       'Sorry, there are no images matching your search query. Please try again.'
     );
   }
+  pictureEnds = false;
   gallery.innerHTML = '';
   createMarkap(searchQuery);
 }
@@ -47,7 +49,9 @@ const observer = new IntersectionObserver(
   entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        createMarkap(searchQuery);
+        if (pictureEnds === false) {
+          createMarkap(searchQuery);
+        }
       }
     });
   },
@@ -72,7 +76,7 @@ async function fetchPicture(searchQuery) {
 function createMarkap(searchQuery) {
   fetchPicture(searchQuery)
     .then(data => {
-      if (data.hits.length === 0 && totalHits == 0) {
+      if (data.hits.length === 0 && totalHits > 0) {
         return Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
@@ -108,10 +112,11 @@ function createMarkap(searchQuery) {
   </div>
 </div>`
       );
-      if (gallery.textContent.trim() == '') {
+      if (gallery.textContent.trim() == '' && currentHits > 0) {
         Notify.success(`Hooray! We found ${data.totalHits} images.`);
       }
       if (currentHits === totalHits) {
+        pictureEnds = true;
         Notify.info(
           "We're sorry, but you've reached the end of search results."
         );
