@@ -45,10 +45,6 @@ body {
   text-align: center;
 }
 
-.is-hidden {
-  opacity: 0;
-}
-
 .photo-card {
   position: relative;
 }
@@ -128,4 +124,8 @@ body {
   margin: 0 auto;
   transition-duration: 250ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.is-hidden {
+  display: none;
 }
