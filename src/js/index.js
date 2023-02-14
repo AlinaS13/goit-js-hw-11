@@ -18,12 +18,11 @@ loadMoreBtn.addEventListener('click', loadMorePiture);
 let page = 1;
 let totalHits = 0;
 let currentHits = 0;
+let searchQuery;
 
 function loadMorePiture(e) {
   e.preventDefault();
   createMarcap(searchQuery);
-  console.log(currentHits);
-  console.log(totalHits);
   if (currentHits === totalHits) {
     loadMoreBtn.classList.add('is-hidden');
     return Notify.info(
