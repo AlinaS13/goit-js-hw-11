@@ -42,15 +42,16 @@ function renderPicture(e) {
   }
   pictureEnds = false;
   gallery.innerHTML = '';
-  createMarkap(searchQuery);
+  createMarkap();
 }
 
 const observer = new IntersectionObserver(
   entries => {
     entries.forEach(entry => {
+      console.log('obs call');
       if (entry.isIntersecting) {
         if (pictureEnds === false) {
-          createMarkap(searchQuery);
+          createMarkap();
         }
       }
     });
@@ -58,7 +59,7 @@ const observer = new IntersectionObserver(
   { rootMargin: '200px' }
 );
 
-async function fetchPicture(searchQuery) {
+async function fetchPicture() {
   const { data } = await pictureInstance.get('/', {
     params: {
       key: '33606619-e92c95447caff2b5a446312ae',
@@ -73,18 +74,19 @@ async function fetchPicture(searchQuery) {
   return data;
 }
 
-function createMarkap(searchQuery) {
+function createMarkap() {
   fetchPicture(searchQuery)
-    .then(data => {
-      if (data.hits.length === 0 && totalHits > 0) {
+    .then(({ hits, totalHits }) => {
+      if (hits.length === 0) {
+        console.log('createMarkap');
         return Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
       }
-      currentHits += data.hits.length;
-      totalHits = data.totalHits;
+      currentHits += hits.length;
+      totalHits = totalHits;
       // loadMoreBtn.classList.remove('is-hidden');
-      const markup = data.hits.map(
+      const markup = hits.map(
         ({
           webformatURL,
           largeImageURL,
@@ -113,7 +115,7 @@ function createMarkap(searchQuery) {
 </div>`
       );
       if (gallery.textContent.trim() == '' && currentHits > 0) {
-        Notify.success(`Hooray! We found ${data.totalHits} images.`);
+        Notify.success(`Hooray! We found ${totalHits} images.`);
       }
       if (currentHits === totalHits) {
         pictureEnds = true;
@@ -121,11 +123,11 @@ function createMarkap(searchQuery) {
           "We're sorry, but you've reached the end of search results."
         );
       }
+      observer.observe(guard);
       gallery.insertAdjacentHTML('beforeend', markup.join(''));
       simpleLightbox();
       scroll();
       page += 1;
-      observer.observe(guard);
     })
     .catch(error => {
       console.log(error);
