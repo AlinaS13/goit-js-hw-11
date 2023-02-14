@@ -9,11 +9,11 @@ const pictureInstance = axios.create({
 
 const form = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
-// const guard = document.querySelector('.guard');
-const loadMoreBtn = document.querySelector('.load-more');
+const guard = document.querySelector('.guard');
+// const loadMoreBtn = document.querySelector('.load-more');
 
 form.addEventListener('submit', renderPicture);
-loadMoreBtn.addEventListener('click', loadMorePiture);
+// loadMoreBtn.addEventListener('click', loadMorePiture);
 
 let page = 1;
 let searchQuery = 0;
@@ -21,21 +21,21 @@ let totalHits;
 let currentHits = 0;
 let pictureEnds = false;
 
-function loadMorePiture(e) {
-  e.preventDefault();
-  createMarkap(searchQuery);
-  if (currentHits === totalHits) {
-    loadMoreBtn.classList.add('is-hidden');
-    return Notify.info(
-      "We're sorry, but you've reached the end of search results."
-    );
-  }
-}
+// function loadMorePiture(e) {
+//   e.preventDefault();
+//   createMarkap(searchQuery);
+//   if (currentHits === totalHits) {
+//     loadMoreBtn.classList.add('is-hidden');
+//     return Notify.info(
+//       "We're sorry, but you've reached the end of search results."
+//     );
+//   }
+// }
 
 function renderPicture(e) {
   e.preventDefault();
   searchQuery = form.elements.searchQuery.value.trim();
-  loadMoreBtn.classList.add('is-hidden');
+  // loadMoreBtn.classList.add('is-hidden');
   if (searchQuery === '') {
     return Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
@@ -47,18 +47,18 @@ function renderPicture(e) {
   createMarkap();
 }
 
-// const observer = new IntersectionObserver(
-//   entries => {
-//     entries.forEach(entry => {
-//       if (entry.isIntersecting) {
-//         if (pictureEnds === false) {
-//           createMarkap();
-//         }
-//       }
-//     });
-//   },
-//   { rootMargin: '200px' }
-// );
+const observer = new IntersectionObserver(
+  entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (pictureEnds === false) {
+          createMarkap();
+        }
+      }
+    });
+  },
+  { rootMargin: '200px' }
+);
 
 async function fetchPicture() {
   const { data } = await pictureInstance.get('/', {
@@ -86,7 +86,7 @@ function createMarkap() {
       currentHits += hits.length;
       totalHits = totalHits;
 
-      loadMoreBtn.classList.remove('is-hidden');
+      // loadMoreBtn.classList.remove('is-hidden');
       const markup = hits.map(
         ({
           webformatURL,
@@ -119,14 +119,14 @@ function createMarkap() {
         Notify.success(`Hooray! We found ${totalHits} images.`);
       }
       if (currentHits === totalHits) {
-        loadMoreBtn.classList.add('is-hidden');
+        // loadMoreBtn.classList.add('is-hidden');
         pictureEnds = true;
         Notify.info(
           "We're sorry, but you've reached the end of search results."
         );
       }
       gallery.insertAdjacentHTML('beforeend', markup.join(''));
-      // observer.observe(guard);
+      observer.observe(guard);
       simpleLightbox();
       scroll();
       page += 1;
