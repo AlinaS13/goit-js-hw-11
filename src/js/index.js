@@ -9,29 +9,29 @@ const pictureInstance = axios.create({
 
 const form = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
-const loadMoreBtn = document.querySelector('.load-more');
+const guard = document.querySelector('.guard');
+// const loadMoreBtn = document.querySelector('.load-more');
 
-form.addEventListener('submit', featchPicture);
-
-loadMoreBtn.addEventListener('click', loadMorePiture);
+form.addEventListener('submit', renderPicture);
+// loadMoreBtn.addEventListener('click', loadMorePiture);
 
 let page = 1;
+let searchQuery;
 let totalHits = 0;
 let currentHits = 0;
-let searchQuery;
 
-function loadMorePiture(e) {
-  e.preventDefault();
-  createMarcap(searchQuery);
-  if (currentHits === totalHits) {
-    loadMoreBtn.classList.add('is-hidden');
-    return Notify.info(
-      "We're sorry, but you've reached the end of search results."
-    );
-  }
-}
+// function loadMorePiture(e) {
+//   e.preventDefault();
+//   fetchPicture(searchQuery);
+//   if (currentHits === totalHits) {
+// loadMoreBtn.classList.add('is-hidden');
+//     return Notify.info(
+//       "We're sorry, but you've reached the end of search results."
+//     );
+//   }
+// }
 
-function featchPicture(e) {
+function renderPicture(e) {
   e.preventDefault();
   searchQuery = form.elements.searchQuery.value.trim();
   if (searchQuery === '') {
@@ -40,11 +40,22 @@ function featchPicture(e) {
     );
   }
   gallery.innerHTML = '';
-  createMarcap(searchQuery);
+  createMarkap(searchQuery);
 }
 
-function createMarcap(searchQuery) {
-  const pictureRequest = pictureInstance.get('/', {
+const observer = new IntersectionObserver(
+  entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        createMarkap(searchQuery);
+      }
+    });
+  },
+  { rootMargin: '200px' }
+);
+
+async function fetchPicture(searchQuery) {
+  const { data } = await pictureInstance.get('/', {
     params: {
       key: '33606619-e92c95447caff2b5a446312ae',
       q: searchQuery,
@@ -55,9 +66,12 @@ function createMarcap(searchQuery) {
       page: page,
     },
   });
+  return data;
+}
 
-  pictureRequest
-    .then(({ data }) => {
+function createMarkap(searchQuery) {
+  fetchPicture(searchQuery)
+    .then(data => {
       if (data.hits.length === 0) {
         return Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
@@ -65,8 +79,7 @@ function createMarcap(searchQuery) {
       }
       currentHits += data.hits.length;
       totalHits = data.totalHits;
-      page += 1;
-      loadMoreBtn.classList.remove('is-hidden');
+      // loadMoreBtn.classList.remove('is-hidden');
       const markup = data.hits.map(
         ({
           webformatURL,
@@ -77,7 +90,8 @@ function createMarcap(searchQuery) {
           comments,
           downloads,
         }) => `<div class="photo-card">
-  <img src="${webformatURL}" alt="${tags}" class="gallery-image" loading="lazy" />
+        <a href="${largeImageURL}" loading="lazy" width="400px" height="244px" style="object-fit:cover;">
+  <img src="${webformatURL}" alt="${tags}" class="gallery-image" loading="lazy" /></a>
   <div class="info">
     <p class="info-item">
       <b> Likes: ${likes} </b>
@@ -94,10 +108,37 @@ function createMarcap(searchQuery) {
   </div>
 </div>`
       );
+      if (gallery.textContent.trim() == '') {
+        Notify.success(`Hooray! We found ${data.totalHits} images.`);
+      }
       gallery.insertAdjacentHTML('beforeend', markup.join(''));
-      return Notify.success(`Hooray! We found ${data.totalHits} images.`);
+      simpleLightbox();
+      scroll();
+      page += 1;
+      observer.observe(guard);
     })
     .catch(error => {
       console.log(error);
     });
+}
+
+function scroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
+}
+
+function simpleLightbox() {
+  let lightbox = new SimpleLightbox('.gallery a', {
+    captions: false,
+    captionDelay: 250,
+    enableKeyboard: true,
+    doubleTapZoom: 5,
+  });
+  lightbox.refresh();
 }
