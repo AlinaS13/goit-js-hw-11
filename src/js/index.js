@@ -35,6 +35,7 @@ let pictureEnds = false;
 function renderPicture(e) {
   e.preventDefault();
   searchQuery = form.elements.searchQuery.value.trim();
+  page = 1;
   // loadMoreBtn.classList.add('is-hidden');
   if (searchQuery === '') {
     return Notify.failure(
@@ -44,6 +45,7 @@ function renderPicture(e) {
 
   pictureEnds = false;
   gallery.innerHTML = '';
+  observer.unobserve(guard);
   createMarkap();
 }
 
@@ -127,6 +129,7 @@ function createMarkap() {
       }
       gallery.insertAdjacentHTML('beforeend', markup.join(''));
       observer.observe(guard);
+
       simpleLightbox();
       scroll();
       page += 1;
