@@ -17,14 +17,14 @@ form.addEventListener('submit', renderPicture);
 
 let page = 1;
 let searchQuery = 0;
-let totalHits;
+let totalHitsCount;
 let currentHits = 0;
 let pictureEnds = false;
 
 // function loadMorePiture(e) {
 //   e.preventDefault();
 //   createMarkap(searchQuery);
-//   if (currentHits === totalHits) {
+//   if (currentHits === totalHitsCount) {
 //     loadMoreBtn.classList.add('is-hidden');
 //     return Notify.info(
 //       "We're sorry, but you've reached the end of search results."
@@ -36,6 +36,8 @@ function renderPicture(e) {
   e.preventDefault();
   searchQuery = form.elements.searchQuery.value.trim();
   page = 1;
+  totalHitsCount = 0;
+  currentHits = 0;
   // loadMoreBtn.classList.add('is-hidden');
   if (searchQuery === '') {
     return Notify.failure(
@@ -43,6 +45,11 @@ function renderPicture(e) {
     );
   }
 
+  if (currentHits >= totalHitsCount && currentHits > 0) {
+    return Notify.info(
+      "We're sorry, but you've reached the end of search results."
+    );
+  }
   pictureEnds = false;
   gallery.innerHTML = '';
   observer.unobserve(guard);
@@ -63,6 +70,12 @@ const observer = new IntersectionObserver(
 );
 
 async function fetchPicture() {
+  if (currentHits >= totalHitsCount && currentHits > 0) {
+    Notify.info("We're sorry, but you've reached the end of search results.");
+
+    return {};
+  }
+
   const { data } = await pictureInstance.get('/', {
     params: {
       key: '33606619-e92c95447caff2b5a446312ae',
@@ -79,17 +92,23 @@ async function fetchPicture() {
 
 function createMarkap() {
   fetchPicture(searchQuery)
-    .then(({ hits, totalHits }) => {
-      if (hits.length === 0) {
+    .then(data => {
+      if (
+        data &&
+        Object.keys(data).length === 0 &&
+        Object.getPrototypeOf(data) === Object.prototype
+      ) {
+        return;
+      }
+      if (data.hits.length === 0) {
         return Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
       }
-      currentHits += hits.length;
-      totalHits = totalHits;
-
+      currentHits += data.hits.length;
+      totalHitsCount = data.totalHits;
       // loadMoreBtn.classList.remove('is-hidden');
-      const markup = hits.map(
+      const markup = data.hits.map(
         ({
           webformatURL,
           largeImageURL,
@@ -118,9 +137,9 @@ function createMarkap() {
 </div>`
       );
       if (gallery.textContent.trim() == '' && currentHits > 0) {
-        Notify.success(`Hooray! We found ${totalHits} images.`);
+        Notify.success(`Hooray! We found ${data.totalHits} images.`);
       }
-      if (currentHits === totalHits) {
+      if (currentHits === totalHitsCount) {
         // loadMoreBtn.classList.add('is-hidden');
         pictureEnds = true;
         Notify.info(
@@ -129,8 +148,7 @@ function createMarkap() {
       }
       gallery.insertAdjacentHTML('beforeend', markup.join(''));
       observer.observe(guard);
-
-      simpleLightbox();
+      lightbox.refresh();
       scroll();
       page += 1;
     })
@@ -150,12 +168,9 @@ function scroll() {
   });
 }
 
-function simpleLightbox() {
-  let lightbox = new SimpleLightbox('.gallery a', {
-    captions: false,
-    captionDelay: 250,
-    enableKeyboard: true,
-    doubleTapZoom: 5,
-  });
-  lightbox.refresh();
-}
+let lightbox = new SimpleLightbox('.gallery a', {
+  captions: false,
+  captionDelay: 250,
+  enableKeyboard: true,
+  doubleTapZoom: 5,
+});
