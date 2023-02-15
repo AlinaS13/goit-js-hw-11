@@ -12,18 +12,18 @@ const gallery = document.querySelector('.gallery');
 const guard = document.querySelector('.guard');
 // const loadMoreBtn = document.querySelector('.load-more');
 
-form.addEventListener('submit', renderPicture);
+form.addEventListener('submit', loadMoreScrol);
 // loadMoreBtn.addEventListener('click', loadMorePiture);
 
 let page = 1;
-let searchQuery = 0;
+let searchQuery = '';
 let totalHitsCount;
 let currentHits = 0;
 let pictureEnds = false;
 
 // function loadMorePiture(e) {
 //   e.preventDefault();
-//   createMarkap(searchQuery);
+//   createMarkap(data);
 //   if (currentHits === totalHitsCount) {
 //     loadMoreBtn.classList.add('is-hidden');
 //     return Notify.info(
@@ -32,7 +32,7 @@ let pictureEnds = false;
 //   }
 // }
 
-function renderPicture(e) {
+function loadMoreScrol(e) {
   e.preventDefault();
   searchQuery = form.elements.searchQuery.value.trim();
   page = 1;
@@ -44,16 +44,15 @@ function renderPicture(e) {
       'Sorry, there are no images matching your search query. Please try again.'
     );
   }
-
   if (currentHits >= totalHitsCount && currentHits > 0) {
     return Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
   }
+  parsData();
   pictureEnds = false;
   gallery.innerHTML = '';
   observer.unobserve(guard);
-  createMarkap();
 }
 
 const observer = new IntersectionObserver(
@@ -61,7 +60,7 @@ const observer = new IntersectionObserver(
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         if (pictureEnds === false) {
-          createMarkap();
+          parsData();
         }
       }
     });
@@ -70,12 +69,6 @@ const observer = new IntersectionObserver(
 );
 
 async function fetchPicture() {
-  if (currentHits >= totalHitsCount && currentHits > 0) {
-    Notify.info("We're sorry, but you've reached the end of search results.");
-
-    return {};
-  }
-
   const { data } = await pictureInstance.get('/', {
     params: {
       key: '33606619-e92c95447caff2b5a446312ae',
@@ -90,16 +83,16 @@ async function fetchPicture() {
   return data;
 }
 
-function createMarkap() {
+function parsData() {
   fetchPicture(searchQuery)
     .then(data => {
-      if (
-        data &&
-        Object.keys(data).length === 0 &&
-        Object.getPrototypeOf(data) === Object.prototype
-      ) {
-        return;
-      }
+      // if (
+      //   data &&
+      //   Object.keys(data).length === 0 &&
+      //   Object.getPrototypeOf(data) === Object.prototype
+      // ) {
+      //   return;
+      // }
       if (data.hits.length === 0) {
         return Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
@@ -107,54 +100,58 @@ function createMarkap() {
       }
       currentHits += data.hits.length;
       totalHitsCount = data.totalHits;
+      createMarkap(data);
       // loadMoreBtn.classList.remove('is-hidden');
-      const markup = data.hits.map(
-        ({
-          webformatURL,
-          largeImageURL,
-          tags,
-          likes,
-          views,
-          comments,
-          downloads,
-        }) => `<div class="photo-card">
-        <a href="${largeImageURL}" loading="lazy" width="400px" height="244px" style="object-fit:cover;">
-  <img src="${webformatURL}" alt="${tags}" class="gallery-image" loading="lazy" /></a>
-  <div class="info">
-    <p class="info-item">
-      <b> Likes: ${likes} </b>
-    </p>
-    <p class="info-item">
-      <b> Views: ${views} </b>
-    </p>
-    <p class="info-item">
-      <b> Comments: ${comments} </b>
-    </p>
-    <p class="info-item">
-      <b> Downloads: ${downloads} </b>
-    </p>
-  </div>
-</div>`
-      );
-      if (gallery.textContent.trim() == '' && currentHits > 0) {
-        Notify.success(`Hooray! We found ${data.totalHits} images.`);
-      }
-      if (currentHits === totalHitsCount) {
-        // loadMoreBtn.classList.add('is-hidden');
-        pictureEnds = true;
-        Notify.info(
-          "We're sorry, but you've reached the end of search results."
-        );
-      }
-      gallery.insertAdjacentHTML('beforeend', markup.join(''));
-      observer.observe(guard);
-      lightbox.refresh();
-      scroll();
-      page += 1;
     })
     .catch(error => {
       console.log(error);
     });
+}
+
+function createMarkap(data) {
+  const markup = data.hits.map(
+    ({
+      webformatURL,
+      largeImageURL,
+      tags,
+      likes,
+      views,
+      comments,
+      downloads,
+    }) =>
+      `<div class="photo-card">
+            <a href="${largeImageURL}" loading="lazy" width="400px" height="244px" style="object-fit:cover;">
+              <img src="${webformatURL}" alt="${tags}" class="gallery-image" loading="lazy" /></a>
+                <div class="info">
+                  <p class="info-item">
+                      <b> Likes: ${likes} </b>
+                  </p>
+                  <p class="info-item">
+                      <b> Views: ${views} </b>
+                  </p>
+                  <p class="info-item">
+                      <b> Comments: ${comments} </b>
+                  </p>
+                  <p class="info-item">
+                      <b> Downloads: ${downloads} </b>
+                  </p>
+                  </div>
+                  </div>`
+  );
+
+  if (gallery.textContent.trim() == '' && currentHits > 0) {
+    Notify.success(`Hooray! We found ${data.totalHits} images.`);
+  }
+  if (currentHits === totalHitsCount) {
+    // loadMoreBtn.classList.add('is-hidden');
+    pictureEnds = true;
+    Notify.info("We're sorry, but you've reached the end of search results.");
+  }
+  gallery.insertAdjacentHTML('beforeend', markup.join(''));
+  observer.observe(guard);
+  lightbox.refresh();
+  scroll();
+  page += 1;
 }
 
 function scroll() {
